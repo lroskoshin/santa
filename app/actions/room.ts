@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "../../lib/prisma";
-import { createRoomSchema } from "../../lib/validations/room";
+import { createRoomSchema, joinRoomSchema } from "../../lib/validations/room";
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -10,6 +10,7 @@ export interface ActionState {
   error?: string;
   fieldErrors?: {
     name?: string[];
+    wishlist?: string[];
   };
 }
 
@@ -120,4 +121,77 @@ export async function createRoom(
   });
 
   redirect(`/room/${room.id}/admin`);
+}
+
+export async function joinRoom(
+  roomId: string,
+  inviteToken: string,
+  _prevState: ActionState | null,
+  formData: FormData
+): Promise<ActionState | null> {
+  // Verify the room exists and token is valid
+  const room = await prisma.room.findUnique({
+    where: { id: roomId },
+    select: { id: true, inviteToken: true, allowWishlist: true },
+  });
+
+  if (!room || room.inviteToken !== inviteToken) {
+    return {
+      error: "Недействительная ссылка приглашения",
+    };
+  }
+
+  const rawData = {
+    name: formData.get("name"),
+    wishlist: formData.get("wishlist") || undefined,
+  };
+
+  const result = joinRoomSchema.safeParse(rawData);
+
+  if (!result.success) {
+    const fieldErrors = result.error.flatten().fieldErrors;
+    return {
+      error: "Проверьте введённые данные",
+      fieldErrors: {
+        name: fieldErrors.name,
+        wishlist: fieldErrors.wishlist,
+      },
+    };
+  }
+
+  const { name, wishlist } = result.data;
+  const sessionId = await getUserToken();
+
+  // Check if user already joined this room
+  const existingParticipant = await prisma.participant.findUnique({
+    where: {
+      roomId_sessionId: {
+        roomId: room.id,
+        sessionId,
+      },
+    },
+  });
+
+  if (existingParticipant) {
+    // Update existing participant
+    await prisma.participant.update({
+      where: { id: existingParticipant.id },
+      data: {
+        name,
+        wishlist: room.allowWishlist ? wishlist : null,
+      },
+    });
+  } else {
+    // Create new participant
+    await prisma.participant.create({
+      data: {
+        roomId: room.id,
+        name,
+        wishlist: room.allowWishlist ? wishlist : null,
+        sessionId,
+      },
+    });
+  }
+
+  redirect(`/room/${room.id}/joined`);
 }
