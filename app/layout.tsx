@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Тайный Санта",
-  description: "Организуй тайного санту для друзей или коллег",
+  title: "WeSanta — Secret Santa",
+  description: "Organize a Secret Santa for friends or colleagues",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
