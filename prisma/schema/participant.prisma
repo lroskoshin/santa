@@ -1,0 +1,17 @@
+model Participant {
+  id        String  @id @default(cuid())
+  roomId    String
+  name      String
+  email     String?
+  wishlist  String?
+  sessionId String? // anonymous user identifier from cookie
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  givenAssignment    Assignment? @relation("Santa")
+  receivedAssignment Assignment? @relation("Target")
+
+  @@unique([roomId, sessionId])
+  @@index([roomId])
+}
+

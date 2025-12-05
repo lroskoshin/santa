@@ -1,0 +1,14 @@
+model Assignment {
+  id        String   @id @default(cuid())
+  roomId    String
+  santaId   String   @unique
+  targetId  String   @unique
+  createdAt DateTime @default(now())
+
+  room   Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  santa  Participant @relation("Santa", fields: [santaId], references: [id], onDelete: Cascade)
+  target Participant @relation("Target", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+}
+
