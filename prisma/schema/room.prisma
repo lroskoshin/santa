@@ -1,0 +1,12 @@
+model Room {
+  id            String   @id @default(cuid())
+  name          String
+  allowWishlist Boolean  @default(true)
+  inviteToken   String   @unique
+  adminToken    String   @unique
+  createdAt     DateTime @default(now())
+
+  participants Participant[]
+  assignments  Assignment[]
+}
+
