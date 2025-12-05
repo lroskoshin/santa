@@ -33,7 +33,7 @@ export default async function Home() {
               {userRooms.map((room) => (
                 <li key={room.id}>
                   <Link
-                    href={`/room/${room.id}/admin?token=${room.adminToken}`}
+                    href={`/room/${room.id}/admin`}
                     className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-slate-600 hover:bg-slate-800"
                   >
                     <div className="flex flex-col gap-1">

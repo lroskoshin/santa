@@ -3,10 +3,12 @@ model Room {
   name          String
   allowWishlist Boolean  @default(true)
   inviteToken   String   @unique
-  adminToken    String   @unique
+  adminToken    String
   createdAt     DateTime @default(now())
 
   participants Participant[]
   assignments  Assignment[]
+
+  @@index([adminToken])
 }
 
