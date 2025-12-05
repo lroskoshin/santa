@@ -1,17 +1,18 @@
 import { prisma } from "../../../../lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { CopyButton } from "./copy-button";
+import { isRoomAdmin } from "../../../actions/room";
 
 interface AdminPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ token?: string }>;
 }
 
-export default async function AdminPage({ params, searchParams }: AdminPageProps) {
+export default async function AdminPage({ params }: AdminPageProps) {
   const { id } = await params;
-  const { token } = await searchParams;
 
-  if (!token) {
+  const isAdmin = await isRoomAdmin(id);
+
+  if (!isAdmin) {
     redirect("/");
   }
 
@@ -22,13 +23,12 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
     },
   });
 
-  if (!room || room.adminToken !== token) {
+  if (!room) {
     notFound();
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const inviteUrl = `${baseUrl}/room/${room.id}/join?token=${room.inviteToken}`;
-  const adminUrl = `${baseUrl}/room/${room.id}/admin?token=${room.adminToken}`;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
@@ -43,26 +43,14 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
           </p>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-400">
-                Ссылка для участников
-              </span>
-              <CopyButton text={inviteUrl} />
-            </div>
-            <p className="break-all text-sm text-emerald-400">{inviteUrl}</p>
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-slate-400">
+              Ссылка для участников
+            </span>
+            <CopyButton text={inviteUrl} />
           </div>
-
-          <div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-amber-400">
-                🔐 Ссылка админа (только для тебя!)
-              </span>
-              <CopyButton text={adminUrl} />
-            </div>
-            <p className="break-all text-sm text-amber-300/80">{adminUrl}</p>
-          </div>
+          <p className="break-all text-sm text-emerald-400">{inviteUrl}</p>
         </div>
 
         <div className="rounded-xl border border-slate-700 bg-slate-800/30 p-4">

@@ -13,49 +13,42 @@ export interface ActionState {
   };
 }
 
-const ADMIN_TOKENS_COOKIE = "santa_admin_tokens";
+const USER_TOKEN_COOKIE = "santa_user_token";
 
-async function saveAdminToken(adminToken: string) {
+async function getUserToken(): Promise<string> {
   const cookieStore = await cookies();
-  const existingTokens = cookieStore.get(ADMIN_TOKENS_COOKIE)?.value;
-  const tokens = existingTokens ? existingTokens.split(",") : [];
+  const existingToken = cookieStore.get(USER_TOKEN_COOKIE)?.value;
 
-  if (!tokens.includes(adminToken)) {
-    tokens.push(adminToken);
+  if (existingToken) {
+    return existingToken;
   }
 
-  cookieStore.set(ADMIN_TOKENS_COOKIE, tokens.join(","), {
+  const newToken = nanoid(16);
+  cookieStore.set(USER_TOKEN_COOKIE, newToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 365, // 1 year
   });
+
+  return newToken;
 }
 
 export async function getUserRooms() {
   const cookieStore = await cookies();
-  const tokensString = cookieStore.get(ADMIN_TOKENS_COOKIE)?.value;
+  const userToken = cookieStore.get(USER_TOKEN_COOKIE)?.value;
 
-  if (!tokensString) {
-    return [];
-  }
-
-  const tokens = tokensString.split(",").filter(Boolean);
-
-  if (tokens.length === 0) {
+  if (!userToken) {
     return [];
   }
 
   const rooms = await prisma.room.findMany({
     where: {
-      adminToken: {
-        in: tokens,
-      },
+      adminToken: userToken,
     },
     select: {
       id: true,
       name: true,
-      adminToken: true,
       createdAt: true,
       _count: {
         select: {
@@ -69,6 +62,26 @@ export async function getUserRooms() {
   });
 
   return rooms;
+}
+
+export async function isRoomAdmin(roomId: string): Promise<boolean> {
+  const cookieStore = await cookies();
+  const userToken = cookieStore.get(USER_TOKEN_COOKIE)?.value;
+
+  if (!userToken) {
+    return false;
+  }
+
+  const room = await prisma.room.findUnique({
+    where: { id: roomId },
+    select: { adminToken: true },
+  });
+
+  if (!room) {
+    return false;
+  }
+
+  return room.adminToken === userToken;
 }
 
 export async function createRoom(
@@ -95,18 +108,16 @@ export async function createRoom(
   const { name, allowWishlist } = result.data;
 
   const inviteToken = nanoid(10);
-  const adminToken = nanoid(16);
+  const userToken = await getUserToken();
 
   const room = await prisma.room.create({
     data: {
       name,
       allowWishlist,
       inviteToken,
-      adminToken,
+      adminToken: userToken,
     },
   });
 
-  await saveAdminToken(adminToken);
-
-  redirect(`/room/${room.id}/admin?token=${adminToken}`);
+  redirect(`/room/${room.id}/admin`);
 }
