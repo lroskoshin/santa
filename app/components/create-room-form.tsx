@@ -34,6 +34,18 @@ export function CreateRoomForm() {
         )}
       </div>
 
+      <label className="flex items-center gap-3 cursor-pointer group">
+        <input
+          type="checkbox"
+          name="allowWishlist"
+          defaultChecked
+          className="h-5 w-5 rounded border-slate-600 bg-slate-800/50 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer"
+        />
+        <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
+          Разрешить участникам указывать пожелания к подарку
+        </span>
+      </label>
+
       <button
         type="submit"
         disabled={isPending}

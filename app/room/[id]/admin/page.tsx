@@ -1,6 +1,7 @@
 import { prisma } from "../../../../lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { CopyButton } from "./copy-button";
+import { ShuffleButton } from "./shuffle-button";
 import { isRoomAdmin } from "../../../actions/room";
 
 interface AdminPageProps {
@@ -78,17 +79,11 @@ export default async function AdminPage({ params }: AdminPageProps) {
           )}
         </div>
 
-        {room.participants.length >= 3 && (
-          <button className="h-12 w-full rounded-xl bg-red-600 font-semibold text-white transition-all hover:bg-red-500">
-            🎲 Запустить распределение
-          </button>
-        )}
-
-        {room.participants.length < 3 && room.participants.length > 0 && (
-          <p className="text-center text-sm text-slate-500">
-            Нужно минимум 3 участника для запуска
-          </p>
-        )}
+        <ShuffleButton
+          roomId={room.id}
+          isShuffled={!!room.shuffledAt}
+          participantsCount={room.participants.length}
+        />
       </main>
     </div>
   );

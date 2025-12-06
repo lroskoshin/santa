@@ -1,9 +1,12 @@
 import { CreateRoomForm } from "./components/create-room-form";
-import { getUserRooms } from "./actions/room";
+import { getUserRooms, getTotalRoomsCount } from "./actions/room";
 import Link from "next/link";
 
 export default async function Home() {
-  const userRooms = await getUserRooms();
+  const [userRooms, totalRooms] = await Promise.all([
+    getUserRooms(),
+    getTotalRoomsCount(),
+  ]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
@@ -23,6 +26,16 @@ export default async function Home() {
         <p className="text-sm text-slate-500">
           Каждый участник узнает, кому он дарит подарок 🎁
         </p>
+
+        {totalRooms > 0 && (
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
+            <span className="text-2xl">✨</span>
+            <p className="text-sm text-emerald-400">
+              Уже создано <span className="font-bold">{totalRooms}</span>{" "}
+              {totalRooms === 1 ? "комната" : totalRooms < 5 ? "комнаты" : "комнат"}!
+            </p>
+          </div>
+        )}
 
         {userRooms.length > 0 && (
           <div className="w-full">

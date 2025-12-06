@@ -1,10 +1,11 @@
 model Room {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
-  allowWishlist Boolean  @default(true)
-  inviteToken   String   @unique
+  allowWishlist Boolean   @default(true)
+  inviteToken   String    @unique
   adminToken    String
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  shuffledAt    DateTime? // Когда была проведена жеребьёвка (null = ещё не проводилась)
 
   participants Participant[]
   assignments  Assignment[]
