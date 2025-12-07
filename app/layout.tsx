@@ -1,17 +1,12 @@
 import "./globals.css";
 
 // Root layout - minimal wrapper, actual layout is in [locale]/layout.tsx
+// We don't render <html> or <body> here because [locale]/layout.tsx does it
+// with the correct locale-specific lang attribute
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col bg-[#0c1222] text-white antialiased">
-        {children}
-      </body>
-    </html>
-  );
+  return children;
 }
-
