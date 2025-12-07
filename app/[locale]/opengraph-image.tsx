@@ -1,15 +1,51 @@
 import { ImageResponse } from "next/og";
+import type { Locale } from "@/lib/i18n";
 
-export const runtime = "edge";
-
-export const alt = "WeSanta — Тайный Санта онлайн";
 export const size = {
   width: 1200,
   height: 630,
 };
 export const contentType = "image/png";
 
-export default async function Image() {
+interface ImageProps {
+  params: Promise<{ locale: Locale }>;
+}
+
+const ogTexts = {
+  ru: {
+    alt: "WeSanta — Тайный Санта онлайн",
+    subtitle: "Тайный Санта онлайн",
+    cta: "Бесплатно и без регистрации",
+  },
+  en: {
+    alt: "WeSanta — Secret Santa Online",
+    subtitle: "Secret Santa Online",
+    cta: "Free and no registration",
+  },
+};
+
+export async function generateImageMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  const texts = ogTexts[locale] || ogTexts.ru;
+
+  return [
+    {
+      id: "default",
+      alt: texts.alt,
+      contentType: "image/png",
+      size,
+    },
+  ];
+}
+
+export default async function Image({ params }: ImageProps) {
+  const { locale } = await params;
+  const texts = ogTexts[locale] || ogTexts.ru;
+
   return new ImageResponse(
     (
       <div
@@ -28,7 +64,7 @@ export default async function Image() {
           overflow: "hidden",
         }}
       >
-        {/* Декоративные снежинки */}
+        {/* Decorative snowflakes */}
         <div
           style={{
             position: "absolute",
@@ -114,7 +150,7 @@ export default async function Image() {
           ✨
         </div>
 
-        {/* Основной контент */}
+        {/* Main content */}
         <div
           style={{
             display: "flex",
@@ -123,7 +159,7 @@ export default async function Image() {
             gap: 24,
           }}
         >
-          {/* Иконка Санты */}
+          {/* Santa icon */}
           <div
             style={{
               fontSize: 120,
@@ -134,7 +170,7 @@ export default async function Image() {
             🎅
           </div>
 
-          {/* Название */}
+          {/* Title */}
           <div
             style={{
               display: "flex",
@@ -161,11 +197,11 @@ export default async function Image() {
                 display: "flex",
               }}
             >
-              Тайный Санта онлайн
+              {texts.subtitle}
             </div>
           </div>
 
-          {/* Подзаголовок */}
+          {/* CTA */}
           <div
             style={{
               display: "flex",
@@ -180,12 +216,12 @@ export default async function Image() {
           >
             <span style={{ fontSize: 24, display: "flex" }}>🎁</span>
             <span style={{ fontSize: 24, color: "#10b981", display: "flex" }}>
-              Бесплатно и без регистрации
+              {texts.cta}
             </span>
           </div>
         </div>
 
-        {/* Нижний декор */}
+        {/* Bottom branding */}
         <div
           style={{
             position: "absolute",

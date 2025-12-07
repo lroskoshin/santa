@@ -34,17 +34,26 @@ export async function generateMetadata({
       template: dict.metadata.titleTemplate,
     },
     description: dict.metadata.description,
-    keywords: [
-      "тайный санта",
-      "secret santa",
-      "тайный санта онлайн",
-      "secret santa online",
-      "генератор тайного санты",
-      "gift exchange",
-      "жеребьёвка подарков",
-      "christmas gift exchange",
-      "wesanta",
-    ],
+    keywords:
+      locale === "ru"
+        ? [
+            "тайный санта",
+            "тайный санта онлайн",
+            "генератор тайного санты",
+            "жеребьёвка подарков",
+            "обмен подарками",
+            "новогодние подарки",
+            "wesanta",
+          ]
+        : [
+            "secret santa",
+            "secret santa online",
+            "secret santa generator",
+            "gift exchange",
+            "christmas gift exchange",
+            "holiday gift exchange",
+            "wesanta",
+          ],
     authors: [{ name: "WeSanta Team" }],
     creator: "WeSanta",
     publisher: "WeSanta",
@@ -133,9 +142,10 @@ export default async function RootLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
 }>) {
-  const { locale } = await params;
+  const { locale: localeParam } = await params;
+  const locale = localeParam as Locale;
   const dict = await getDictionary(locale);
   const jsonLd = getJsonLd(locale);
 

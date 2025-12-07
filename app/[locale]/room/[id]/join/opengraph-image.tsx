@@ -2,8 +2,6 @@ import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/lib/i18n";
 
-export const runtime = "edge";
-
 export const alt = "WeSanta — Secret Santa";
 export const size = {
   width: 1200,
