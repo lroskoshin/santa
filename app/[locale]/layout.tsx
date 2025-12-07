@@ -3,7 +3,7 @@ import { Geist } from "next/font/google";
 import Script from "next/script";
 import "../globals.css";
 import { getDictionary } from "./dictionaries";
-import { locales, getLocalizedPath, type Locale } from "@/lib/i18n";
+import { locales, getLocalizedPath, isValidLocale, defaultLocale, type Locale } from "@/lib/i18n";
 import { LocaleSwitcher } from "./components/locale-switcher";
 
 const YANDEX_METRIKA_ID = 105719051;
@@ -146,7 +146,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale: localeParam } = await params;
-  const locale = localeParam as Locale;
+  const locale = isValidLocale(localeParam) ? localeParam : defaultLocale;
   const dict = await getDictionary(locale);
   const jsonLd = getJsonLd(locale);
 
