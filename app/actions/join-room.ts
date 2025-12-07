@@ -11,13 +11,36 @@ import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { getUserToken } from "./utils";
 import type { ActionState } from "./types";
+import { getLocalizedPath, type Locale } from "@/lib/i18n";
+
+const errorMessages = {
+  ru: {
+    invalidLink: "Недействительная ссылка приглашения",
+    alreadyShuffled:
+      "Жеребьёвка уже проведена. Новые участники не могут присоединиться.",
+    checkData: "Проверьте введённые данные",
+    limitReached: (max: number) =>
+      `Достигнут лимит участников (${max}). Обратитесь к организатору.`,
+  },
+  en: {
+    invalidLink: "Invalid invitation link",
+    alreadyShuffled:
+      "Draw has already been completed. New participants cannot join.",
+    checkData: "Please check the entered data",
+    limitReached: (max: number) =>
+      `Participant limit reached (${max}). Contact the organizer.`,
+  },
+};
 
 export async function joinRoom(
   roomId: string,
   inviteToken: string,
+  locale: Locale,
   _prevState: ActionState | null,
   formData: FormData
 ): Promise<ActionState | null> {
+  const messages = errorMessages[locale];
+
   const room = await prisma.room.findUnique({
     where: { id: roomId },
     select: {
@@ -31,21 +54,20 @@ export async function joinRoom(
 
   if (!room || room.inviteToken !== inviteToken) {
     return {
-      error: "Недействительная ссылка приглашения",
+      error: messages.invalidLink,
     };
   }
 
   if (room.shuffledAt) {
     return {
-      error:
-        "Жеребьёвка уже проведена. Новые участники не могут присоединиться.",
+      error: messages.alreadyShuffled,
     };
   }
 
   const rawData = {
     name: formData.get("name"),
-    email: formData.get("email") ?? "",
-    wishlist: formData.get("wishlist") ?? "",
+    email: ((formData.get("email") || "") as string).trim() || undefined,
+    wishlist: formData.get("wishlist") || undefined,
   };
 
   const schema = room.requireEmail
@@ -56,7 +78,7 @@ export async function joinRoom(
   if (!result.success) {
     const fieldErrors = z.flattenError(result.error).fieldErrors;
     return {
-      error: "Проверьте введённые данные",
+      error: messages.checkData,
       fieldErrors: {
         name: fieldErrors.name,
         email: fieldErrors.email,
@@ -107,10 +129,10 @@ export async function joinRoom(
 
     if (inserted === 0) {
       return {
-        error: `Достигнут лимит участников (${MAX_PARTICIPANTS}). Обратитесь к организатору.`,
+        error: messages.limitReached(MAX_PARTICIPANTS),
       };
     }
   }
 
-  redirect(`/room/${room.id}/joined`);
+  redirect(getLocalizedPath(`/room/${room.id}/joined`, locale));
 }

@@ -1,7 +1,14 @@
-import { getUserRooms } from "../actions/queries";
+import { getUserRooms } from "@/app/actions/queries";
 import Link from "next/link";
+import type { getDictionary } from "../dictionaries";
+import { getLocalizedPath, type Locale } from "@/lib/i18n";
 
-export async function UserRooms() {
+interface UserRoomsProps {
+  dictionary: Awaited<ReturnType<typeof getDictionary>>["userRooms"];
+  locale: Locale;
+}
+
+export async function UserRooms({ dictionary, locale }: UserRoomsProps) {
   const userRooms = await getUserRooms();
 
   if (userRooms.length === 0) {
@@ -11,13 +18,18 @@ export async function UserRooms() {
   return (
     <div className="w-full">
       <h2 className="mb-4 text-lg font-semibold text-slate-300">
-        Твои комнаты
+        {dictionary.title}
       </h2>
       <ul className="flex flex-col gap-3">
         {userRooms.map((room) => (
           <li key={room.id}>
             <Link
-              href={room.isAdmin ? `/room/${room.id}/admin` : `/room/${room.id}/joined`}
+              href={getLocalizedPath(
+                room.isAdmin
+                  ? `/room/${room.id}/admin`
+                  : `/room/${room.id}/joined`,
+                locale
+              )}
               className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition-all hover:border-slate-600 hover:bg-slate-800"
             >
               <div className="flex flex-col gap-1">
@@ -25,17 +37,17 @@ export async function UserRooms() {
                   <span className="font-medium text-white">{room.name}</span>
                   {room.isAdmin && (
                     <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-xs font-medium text-amber-400">
-                      👑 Организатор
+                      {dictionary.organizer}
                     </span>
                   )}
                   {room.shuffledAt && (
                     <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-xs font-medium text-emerald-400">
-                      ✓ Распределено
+                      {dictionary.distributed}
                     </span>
                   )}
                 </div>
                 <span className="text-sm text-slate-500">
-                  {room.participantsCount} участник(ов)
+                  {room.participantsCount} {dictionary.participants}
                 </span>
               </div>
               <span className="text-slate-500">→</span>

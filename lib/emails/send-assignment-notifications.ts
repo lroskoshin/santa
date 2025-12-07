@@ -4,6 +4,7 @@ import { prisma } from "../prisma";
 import { resend, EMAIL_FROM } from "../email";
 import { MAX_NOTIFICATIONS } from "../constants";
 import { AssignmentNotificationEmail } from "./assignment-notification";
+import { getLocalizedPath, type Locale } from "@/lib/i18n";
 
 interface ParticipantWithAssignment {
   id: string;
@@ -22,7 +23,39 @@ interface SendNotificationsParams {
   roomId: string;
   roomName: string;
   participants: ParticipantWithAssignment[];
+  locale?: Locale;
 }
+
+const emailSubjects = {
+  ru: {
+    drawComplete: (roomName: string) =>
+      `🎁 ${roomName} — жеребьёвка проведена!`,
+    reminder: (roomName: string) => `🎁 ${roomName} — напоминание о жеребьёвке`,
+  },
+  en: {
+    drawComplete: (roomName: string) => `🎁 ${roomName} — draw completed!`,
+    reminder: (roomName: string) => `🎁 ${roomName} — draw reminder`,
+  },
+};
+
+const errorMessages = {
+  ru: {
+    notFound: "Участник не найден",
+    noEmail: "У участника нет email",
+    notShuffled: "Жеребьёвка ещё не проведена",
+    noAssignment: "Нет назначения для участника",
+    limitReached: (max: number) => `Достигнут лимит отправок (${max})`,
+    sendFailed: "Не удалось отправить письмо",
+  },
+  en: {
+    notFound: "Participant not found",
+    noEmail: "Participant has no email",
+    notShuffled: "Draw has not been completed yet",
+    noAssignment: "No assignment for participant",
+    limitReached: (max: number) => `Send limit reached (${max})`,
+    sendFailed: "Failed to send email",
+  },
+};
 
 // Resend batch limit is 100 emails per request
 const BATCH_SIZE = 100;
@@ -31,6 +64,7 @@ export async function sendAssignmentNotifications({
   roomId,
   roomName,
   participants,
+  locale = "ru",
 }: SendNotificationsParams): Promise<{ sent: number; failed: number }> {
   if (!resend) {
     console.warn("Resend is not configured, skipping email notifications");
@@ -38,7 +72,8 @@ export async function sendAssignmentNotifications({
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://wesanta.club";
-  const viewUrl = `${baseUrl}/room/${roomId}/joined`;
+  const viewUrl = `${baseUrl}${getLocalizedPath(`/room/${roomId}/joined`, locale)}`;
+  const subjects = emailSubjects[locale];
 
   const participantsWithEmail = participants.filter(
     (
@@ -66,13 +101,14 @@ export async function sendAssignmentNotifications({
     return {
       from: EMAIL_FROM,
       to: email,
-      subject: `🎁 ${roomName} — жеребьёвка проведена!`,
+      subject: subjects.drawComplete(roomName),
       react: AssignmentNotificationEmail({
         santaName: name,
         targetName: target.name,
         targetWishlist: target.wishlist,
         roomName,
         viewUrl,
+        locale,
       }),
     };
   });
@@ -120,6 +156,8 @@ export async function sendAssignmentNotifications({
 export async function resendNotificationToParticipant(
   participantId: string
 ): Promise<{ success: boolean; error?: string }> {
+  // Locale is determined from room after fetching participant
+
   if (!resend) {
     return { success: false, error: "Email service not configured" };
   }
@@ -131,6 +169,7 @@ export async function resendNotificationToParticipant(
         select: {
           id: true,
           name: true,
+          locale: true,
           shuffledAt: true,
         },
       },
@@ -148,42 +187,48 @@ export async function resendNotificationToParticipant(
   });
 
   if (!participant) {
-    return { success: false, error: "Участник не найден" };
+    return { success: false, error: errorMessages.ru.notFound };
   }
 
+  // Use locale from room
+  const locale = (participant.room.locale as Locale) || "ru";
+  const messages = errorMessages[locale];
+  const subjects = emailSubjects[locale];
+
   if (!participant.email) {
-    return { success: false, error: "У участника нет email" };
+    return { success: false, error: messages.noEmail };
   }
 
   if (!participant.room.shuffledAt) {
-    return { success: false, error: "Жеребьёвка ещё не проведена" };
+    return { success: false, error: messages.notShuffled };
   }
 
   if (!participant.givenAssignment) {
-    return { success: false, error: "Нет назначения для участника" };
+    return { success: false, error: messages.noAssignment };
   }
 
   if (participant.notificationsSent >= MAX_NOTIFICATIONS) {
     return {
       success: false,
-      error: `Достигнут лимит отправок (${MAX_NOTIFICATIONS})`,
+      error: messages.limitReached(MAX_NOTIFICATIONS),
     };
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://wesanta.club";
-  const viewUrl = `${baseUrl}/room/${participant.room.id}/joined`;
+  const viewUrl = `${baseUrl}${getLocalizedPath(`/room/${participant.room.id}/joined`, locale)}`;
 
   try {
     await resend.emails.send({
       from: EMAIL_FROM,
       to: participant.email,
-      subject: `🎁 ${participant.room.name} — напоминание о жеребьёвке`,
+      subject: subjects.reminder(participant.room.name),
       react: AssignmentNotificationEmail({
         santaName: participant.name,
         targetName: participant.givenAssignment.target.name,
         targetWishlist: participant.givenAssignment.target.wishlist,
         roomName: participant.room.name,
         viewUrl,
+        locale,
       }),
     });
 
@@ -195,6 +240,6 @@ export async function resendNotificationToParticipant(
     return { success: true };
   } catch (error) {
     console.error("Failed to resend notification:", error);
-    return { success: false, error: "Не удалось отправить письмо" };
+    return { success: false, error: messages.sendFailed };
   }
 }

@@ -7,19 +7,42 @@ import {
 } from "../../lib/emails/send-assignment-notifications";
 import { isRoomAdmin } from "./queries";
 import { shuffle } from "./utils";
+import type { Locale } from "@/lib/i18n";
+
+const errorMessages = {
+  ru: {
+    notAdmin: "Только организатор может запустить распределение",
+    roomNotFound: "Комната не найдена",
+    alreadyShuffled: "Жеребьёвка уже была проведена",
+    minParticipants: "Нужно минимум 3 участника",
+    notAdminNotify: "Только организатор может отправлять уведомления",
+    participantNotFound: "Участник не найден в этой комнате",
+  },
+  en: {
+    notAdmin: "Only the organizer can run the draw",
+    roomNotFound: "Room not found",
+    alreadyShuffled: "Draw has already been completed",
+    minParticipants: "Need at least 3 participants",
+    notAdminNotify: "Only the organizer can send notifications",
+    participantNotFound: "Participant not found in this room",
+  },
+};
 
 /**
- * Провести жеребьёвку в комнате
- * Назначает каждому участнику другого участника (по кругу)
+ * Run draw in the room
+ * Assigns each participant to another participant (in a circle)
  */
 export async function shuffleRoom(
-  roomId: string
+  roomId: string,
+  locale: Locale = "ru"
 ): Promise<{ success: boolean; error?: string }> {
+  const messages = errorMessages[locale];
+
   const isAdmin = await isRoomAdmin(roomId);
   if (!isAdmin) {
     return {
       success: false,
-      error: "Только организатор может запустить распределение",
+      error: messages.notAdmin,
     };
   }
 
@@ -31,16 +54,19 @@ export async function shuffleRoom(
     },
   });
 
+  // Use room's locale for emails and notifications
+  const roomLocale = (room?.locale as Locale) || "ru";
+
   if (!room) {
-    return { success: false, error: "Комната не найдена" };
+    return { success: false, error: messages.roomNotFound };
   }
 
   if (room.shuffledAt) {
-    return { success: false, error: "Жеребьёвка уже была проведена" };
+    return { success: false, error: messages.alreadyShuffled };
   }
 
   if (room.participants.length < 3) {
-    return { success: false, error: "Нужно минимум 3 участника" };
+    return { success: false, error: messages.minParticipants };
   }
 
   const shuffledParticipants = shuffle(room.participants);
@@ -74,7 +100,7 @@ export async function shuffleRoom(
   });
 
   if (!shuffleResult.claimed) {
-    return { success: false, error: "Жеребьёвка уже была проведена" };
+    return { success: false, error: messages.alreadyShuffled };
   }
 
   // Send email notifications to participants with emails
@@ -103,6 +129,7 @@ export async function shuffleRoom(
     roomId: room.id,
     roomName: room.name,
     participants: participantsWithAssignments,
+    locale: roomLocale,
   }).catch((error) => {
     console.error("Failed to send assignment notifications:", error);
   });
@@ -111,17 +138,20 @@ export async function shuffleRoom(
 }
 
 /**
- * Повторно отправить уведомление участнику (только админ)
+ * Resend notification to participant (admin only)
  */
 export async function resendNotification(
   roomId: string,
-  participantId: string
+  participantId: string,
+  locale: Locale = "ru"
 ): Promise<{ success: boolean; error?: string }> {
+  const messages = errorMessages[locale];
+
   const isAdmin = await isRoomAdmin(roomId);
   if (!isAdmin) {
     return {
       success: false,
-      error: "Только организатор может отправлять уведомления",
+      error: messages.notAdminNotify,
     };
   }
 
@@ -132,7 +162,7 @@ export async function resendNotification(
   });
 
   if (!participant || participant.roomId !== roomId) {
-    return { success: false, error: "Участник не найден в этой комнате" };
+    return { success: false, error: messages.participantNotFound };
   }
 
   return resendNotificationToParticipant(participantId);

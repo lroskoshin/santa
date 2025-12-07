@@ -3,6 +3,7 @@ model Room {
   name          String
   allowWishlist Boolean   @default(true)
   requireEmail  Boolean   @default(false)
+  locale        String    @default("ru") // Locale used when creating room (for emails and OG)
   inviteToken   String    @unique
   adminToken    String
   createdAt     DateTime  @default(now())

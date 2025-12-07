@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import type { Locale } from "@/lib/i18n";
 
 interface AssignmentNotificationEmailProps {
   santaName: string;
@@ -17,7 +18,35 @@ interface AssignmentNotificationEmailProps {
   targetWishlist: string | null;
   roomName: string;
   viewUrl: string;
+  locale?: Locale;
 }
+
+const emailContent = {
+  ru: {
+    preview: "🎁 Жеребьёвка проведена! Узнай, кому ты даришь подарок",
+    title: "🎄 Тайный Санта",
+    greeting: (name: string) => `Привет, ${name}!`,
+    completed: (roomName: string) => `Жеребьёвка в комнате «${roomName}» завершена!`,
+    youGiftTo: "Ты даришь подарок:",
+    wishes: "💝 Пожелания:",
+    viewOnSite: "Ты всегда можешь посмотреть эту информацию на сайте:",
+    openButton: "Открыть WeSanta",
+    footer: "Это письмо отправлено автоматически сервисом WeSanta.club",
+    doNotReply: "Не отвечайте на это письмо.",
+  },
+  en: {
+    preview: "🎁 Draw completed! Find out who you're giving a gift to",
+    title: "🎄 Secret Santa",
+    greeting: (name: string) => `Hi, ${name}!`,
+    completed: (roomName: string) => `The draw in room "${roomName}" is complete!`,
+    youGiftTo: "You're giving a gift to:",
+    wishes: "💝 Wishes:",
+    viewOnSite: "You can always view this information on the website:",
+    openButton: "Open WeSanta",
+    footer: "This email was sent automatically by WeSanta.club",
+    doNotReply: "Do not reply to this email.",
+  },
+};
 
 export function AssignmentNotificationEmail({
   santaName,
@@ -25,51 +54,50 @@ export function AssignmentNotificationEmail({
   targetWishlist,
   roomName,
   viewUrl,
+  locale = "ru",
 }: AssignmentNotificationEmailProps) {
+  const content = emailContent[locale];
+  
   return (
     <Html>
       <Head />
-      <Preview>
-        🎁 Жеребьёвка проведена! Узнай, кому ты даришь подарок
-      </Preview>
+      <Preview>{content.preview}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>🎄 Тайный Санта</Heading>
+          <Heading style={h1}>{content.title}</Heading>
 
-          <Text style={text}>Привет, {santaName}!</Text>
+          <Text style={text}>{content.greeting(santaName)}</Text>
 
           <Text style={text}>
-            Жеребьёвка в комнате <strong>«{roomName}»</strong> завершена!
+            {content.completed(roomName)}
           </Text>
 
           <Section style={highlightBox}>
-            <Text style={highlightTitle}>Ты даришь подарок:</Text>
+            <Text style={highlightTitle}>{content.youGiftTo}</Text>
             <Text style={targetNameStyle}>{targetName}</Text>
           </Section>
 
           {targetWishlist && (
             <Section style={wishlistSection}>
-              <Text style={wishlistTitle}>💝 Пожелания:</Text>
+              <Text style={wishlistTitle}>{content.wishes}</Text>
               <Text style={wishlistText}>{targetWishlist}</Text>
             </Section>
           )}
 
           <Hr style={hr} />
 
-          <Text style={text}>
-            Ты всегда можешь посмотреть эту информацию на сайте:
-          </Text>
+          <Text style={text}>{content.viewOnSite}</Text>
 
           <Link href={viewUrl} style={button}>
-            Открыть WeSanta
+            {content.openButton}
           </Link>
 
           <Hr style={hr} />
 
           <Text style={footer}>
-            Это письмо отправлено автоматически сервисом WeSanta.club
+            {content.footer}
             <br />
-            Не отвечайте на это письмо.
+            {content.doNotReply}
           </Text>
         </Container>
       </Body>

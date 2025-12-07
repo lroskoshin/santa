@@ -7,8 +7,15 @@ import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { getUserToken } from "./utils";
 import type { ActionState } from "./types";
+import { getLocalizedPath, type Locale } from "@/lib/i18n";
+
+const errorMessages: Record<Locale, string> = {
+  ru: "Проверьте введённые данные",
+  en: "Please check the entered data",
+};
 
 export async function createRoom(
+  locale: Locale,
   _prevState: ActionState | null,
   formData: FormData
 ): Promise<ActionState | null> {
@@ -23,7 +30,7 @@ export async function createRoom(
   if (!result.success) {
     const fieldErrors = z.flattenError(result.error).fieldErrors;
     return {
-      error: "Проверьте введённые данные",
+      error: errorMessages[locale],
       fieldErrors: {
         name: fieldErrors.name,
       },
@@ -40,10 +47,11 @@ export async function createRoom(
       name,
       allowWishlist,
       requireEmail,
+      locale,
       inviteToken,
       adminToken: userToken,
     },
   });
 
-  redirect(`/room/${room.id}/admin`);
+  redirect(getLocalizedPath(`/room/${room.id}/admin`, locale));
 }

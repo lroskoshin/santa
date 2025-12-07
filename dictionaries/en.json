@@ -1,0 +1,168 @@
+{
+  "metadata": {
+    "title": "WeSanta — Secret Santa Online | Free Gift Exchange Generator",
+    "titleTemplate": "%s | WeSanta",
+    "description": "Free Secret Santa organizer 🎅 Create a room in 10 seconds, invite friends via link, and everyone finds out their gift recipient. No registration required!",
+    "ogTitle": "WeSanta — Secret Santa Online 🎅",
+    "ogDescription": "Create a room, invite friends via link — everyone finds out who they're giving a gift to! Free and no registration."
+  },
+  "common": {
+    "home": "Home",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "you": "you",
+    "max": "max"
+  },
+  "layout": {
+    "beta": "Beta",
+    "betaMessage": "Project in development — if something goes wrong, my deepest apologies! 🙏",
+    "telegramLink": "Message on Telegram",
+    "telegram": "Telegram"
+  },
+  "home": {
+    "title": "Secret Santa",
+    "subtitle": "Create a room and invite your friends",
+    "howItWorks": "How it works",
+    "step1": "Create a room and share the link with participants",
+    "step2": "Each participant joins and shares their wishlist",
+    "step3": "Run the draw — everyone finds out who they're giving a gift to 🎁",
+    "forFamily": "👨‍👩‍👧‍👦 For family",
+    "forFriends": "👯 For friends",
+    "forColleagues": "💼 For colleagues",
+    "haveList": "I already have a list",
+    "quickShuffle": "Quickly shuffle names without registration",
+    "partner": "WantGift",
+    "partnerDescription": "Create a wishlist to get what you really want"
+  },
+  "createRoom": {
+    "roomName": "Room name",
+    "placeholder": "Office Christmas 2025",
+    "allowWishlist": "Allow participants to add gift wishes",
+    "requireEmail": "Require email from participants",
+    "submit": "Create room",
+    "submitting": "Creating..."
+  },
+  "roomsCounter": {
+    "created": "Already created",
+    "room_one": "room",
+    "room_few": "rooms",
+    "room_many": "rooms"
+  },
+  "userRooms": {
+    "title": "Your rooms",
+    "organizer": "👑 Organizer",
+    "distributed": "✓ Assigned",
+    "participants": "participant(s)"
+  },
+  "join": {
+    "title": "Join the game",
+    "invitedTo": "You're invited to",
+    "yourName": "Your name",
+    "namePlaceholder": "What's your name?",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "emailHint": "You'll receive the draw results here. Check your Spam folder if you can't find it 📬",
+    "wishlist": "Gift wishes",
+    "optional": "(optional)",
+    "wishlistPlaceholder": "Tell us what you like or your hobbies. This will help your Secret Santa choose a gift 🎁",
+    "wishlistHint": "For example: books, board games, home items, coffee/tea",
+    "wishlistWantGift": "💡 Have a wishlist on",
+    "wishlistWantGiftLink": "? Just paste the link!",
+    "submit": "🎅 Join",
+    "submitting": "Joining...",
+    "footer": "After joining, you'll find out who you're giving a gift to",
+    "closed": "Registration closed",
+    "closedMessage": "Unfortunately, the draw in room {roomName} has already been completed and new participants cannot join."
+  },
+  "joined": {
+    "titleShuffled": "Draw completed!",
+    "titleWaiting": "You're in!",
+    "room": "Room",
+    "welcomeTo": "Welcome to",
+    "youAreSantaFor": "You're Secret Santa for:",
+    "wishes": "Wishes:",
+    "noWishes": "{name} didn't leave any wishes — time to surprise them! 🎉",
+    "registered": "Participant registered",
+    "yourWishes": "Your wishes:",
+    "participants": "Participants:",
+    "waitingMessage": "When everyone joins, the organizer will run the draw and you'll find out who you're giving a gift to 🎁",
+    "waitTitle": "Waiting for the draw",
+    "waitMessage": "Soon this page will show the name of the person you'll be Secret Santa for.",
+    "refreshHint": "If the organizer has already run the draw and nothing has changed here — just refresh the page 🔄",
+    "emailHint": "An email will be sent to {email} — check your Spam folder if you can't find it 📬",
+    "yourWishesForSanta": "Your wishes for Santa:",
+    "backToAdmin": "Room management"
+  },
+  "admin": {
+    "created": "Room created! Send the link to participants",
+    "shuffleCompleted": "Draw completed!",
+    "youAreSantaFor": "You're Secret Santa for:",
+    "wishes": "Wishes:",
+    "noWishes": "{name} didn't leave any wishes — time to surprise them! 🎉",
+    "participatingAs": "You're participating as {name}",
+    "runShuffleHint": "Run the draw to find out who you're giving a gift to",
+    "inviteLink": "Link for participants",
+    "participants": "Participants",
+    "noParticipants": "No one has joined yet",
+    "joinAsParticipant": "Join as participant",
+    "joinHint": "Want to give and receive gifts too?"
+  },
+  "shuffle": {
+    "title": "Quick shuffle",
+    "subtitle": "Enter participant names separated by commas — we'll instantly shuffle them",
+    "namesLabel": "Participant names",
+    "placeholder": "Alice, Bob, Charlie, Diana, Eve",
+    "hint": "Separate names with commas. Example: Alice, Bob, Charlie",
+    "submit": "🎲 Shuffle",
+    "reshuffle": "🔄 Shuffle again",
+    "reset": "Reset",
+    "result": "Shuffle results",
+    "warning": "⚠️ This page doesn't save data. Screenshot the results or write them down!",
+    "minParticipants": "You need at least 2 participants to shuffle",
+    "wantPrivate": "Want everyone to find out their result privately?",
+    "createRoom": "Create a room with invitations"
+  },
+  "shuffleButton": {
+    "run": "🎲 Run the draw",
+    "minRequired": "Need at least 3 participants to start",
+    "completed": "Draw completed!",
+    "assigned": "Participants received their assignments",
+    "confirmTitle": "Run the draw?",
+    "confirmMessage": "After running the draw, new participants won't be able to join the room. Make sure everyone has already joined.",
+    "cancel": "Cancel",
+    "confirm": "Yes, run it",
+    "running": "Shuffling..."
+  },
+  "copyButton": {
+    "copy": "Copy",
+    "copied": "✓ Copied"
+  },
+  "resendButton": {
+    "noEmail": "No email",
+    "limitReached": "Limit reached",
+    "resend": "📧 Resend",
+    "sending": "Sending...",
+    "sent": "✓ Sent",
+    "sendTo": "Send email to {name} ({remaining} left)",
+    "error": "Sending error"
+  },
+  "notFound": {
+    "title": "404",
+    "subtitle": "Santa got lost...",
+    "description": "The page you're looking for got lost in the snowstorm",
+    "backHome": "Back to home"
+  },
+  "email": {
+    "subject": "🎁 Draw completed! Find out who you're giving a gift to",
+    "title": "🎄 Secret Santa",
+    "greeting": "Hi, {name}!",
+    "shuffleCompleted": "The draw in room \"{roomName}\" is complete!",
+    "youGiftTo": "You're giving a gift to:",
+    "wishes": "💝 Wishes:",
+    "viewOnSite": "You can always view this information on the website:",
+    "openButton": "Open WeSanta",
+    "footer": "This email was sent automatically by WeSanta.club",
+    "doNotReply": "Do not reply to this email."
+  }
+}
+

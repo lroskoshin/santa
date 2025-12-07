@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import type { getDictionary } from "../../../dictionaries";
 
 interface CopyButtonProps {
   text: string;
+  dictionary: Awaited<ReturnType<typeof getDictionary>>["copyButton"];
 }
 
-export function CopyButton({ text }: CopyButtonProps) {
+export function CopyButton({ text, dictionary }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -20,7 +22,7 @@ export function CopyButton({ text }: CopyButtonProps) {
       onClick={handleCopy}
       className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-slate-600"
     >
-      {copied ? "✓ Скопировано" : "Копировать"}
+      {copied ? dictionary.copied : dictionary.copy}
     </button>
   );
 }

@@ -1,13 +1,15 @@
-import { prisma } from "../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
-import { isRoomAdmin } from "../../../actions/queries";
-import { MAX_PARTICIPANTS } from "../../../../lib/constants";
+import { isRoomAdmin } from "@/app/actions/queries";
+import { MAX_PARTICIPANTS } from "@/lib/constants";
 import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
+import { getDictionary } from "../../../dictionaries";
+import { getLocalizedPath, type Locale } from "@/lib/i18n";
 
 const USER_TOKEN_COOKIE = "santa_user_token";
 
-// Lazy load client components - они разбиваются на отдельные чанки
+// Lazy load client components
 const CopyButton = dynamic(() =>
   import("./copy-button").then((m) => ({ default: m.CopyButton }))
 );
@@ -22,23 +24,24 @@ const ShuffleButton = dynamic(
 );
 
 import { JoinAsAdminButton } from "./join-as-admin-button";
-import { AutoRefresh } from "../../../../components/auto-refresh";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 const ResendButton = dynamic(() =>
   import("./resend-button").then((m) => ({ default: m.ResendButton }))
 );
 
 interface AdminPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: Locale }>;
 }
 
 export default async function AdminPage({ params }: AdminPageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const dict = await getDictionary(locale);
 
   const isAdmin = await isRoomAdmin(id);
 
   if (!isAdmin) {
-    redirect("/");
+    redirect(getLocalizedPath("/", locale));
   }
 
   const cookieStore = await cookies();
@@ -63,7 +66,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
     notFound();
   }
 
-  // Проверяем, является ли админ участником
+  // Check if admin is a participant
   const adminParticipant = sessionId
     ? await prisma.participant.findUnique({
         where: {
@@ -91,7 +94,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const adminTarget = adminParticipant?.givenAssignment?.target;
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const inviteUrl = `${baseUrl}/room/${room.id}/join?token=${room.inviteToken}`;
+  const inviteUrl = `${baseUrl}${getLocalizedPath(`/room/${room.id}/join?token=${room.inviteToken}`, locale)}`;
 
   return (
     <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
@@ -101,13 +104,11 @@ export default async function AdminPage({ params }: AdminPageProps) {
           <div className="text-5xl">🎄</div>
           <h1 className="text-2xl font-bold text-white">{room.name}</h1>
           <p className="text-slate-400">
-            {room.shuffledAt
-              ? "Жеребьёвка завершена!"
-              : "Комната создана! Отправь ссылку участникам"}
+            {room.shuffledAt ? dict.admin.shuffleCompleted : dict.admin.created}
           </p>
         </div>
 
-        {/* Блок результата жеребьёвки для админа-участника */}
+        {/* Admin's draw result block */}
         {room.shuffledAt && isAdminParticipant && adminTarget && (
           <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-rose-500/10 p-6">
             <div className="flex flex-col items-center gap-4 text-center">
@@ -116,7 +117,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
               </div>
               <div>
                 <p className="text-sm text-amber-400/80">
-                  Ты — Тайный Санта для:
+                  {dict.admin.youAreSantaFor}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-white">
                   {adminTarget.name}
@@ -129,7 +130,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                 <div className="mb-2 flex items-center gap-2">
                   <span className="text-lg">💝</span>
                   <p className="text-sm font-medium text-amber-400">
-                    Пожелания:
+                    {dict.admin.wishes}
                   </p>
                 </div>
                 <p className="leading-relaxed text-slate-300">
@@ -141,15 +142,14 @@ export default async function AdminPage({ params }: AdminPageProps) {
             {!adminTarget.wishlist && (
               <div className="mt-6 rounded-lg border border-slate-700 bg-slate-800/30 p-4 text-center">
                 <p className="text-sm text-slate-500">
-                  {adminTarget.name} не оставил(а) пожеланий — придётся удивить!
-                  🎉
+                  {dict.admin.noWishes.replace("{name}", adminTarget.name)}
                 </p>
               </div>
             )}
           </div>
         )}
 
-        {/* Уведомление что админ участвует но шаффл не проведён */}
+        {/* Notice that admin is participating but draw not done yet */}
         {!room.shuffledAt && isAdminParticipant && adminParticipant && (
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
             <div className="flex items-center gap-3">
@@ -158,10 +158,13 @@ export default async function AdminPage({ params }: AdminPageProps) {
               </div>
               <div>
                 <p className="font-medium text-emerald-400">
-                  Вы участвуете как {adminParticipant.name}
+                  {dict.admin.participatingAs.replace(
+                    "{name}",
+                    adminParticipant.name
+                  )}
                 </p>
                 <p className="text-sm text-slate-400">
-                  Запустите жеребьёвку, чтобы узнать кому дарить подарок
+                  {dict.admin.runShuffleHint}
                 </p>
               </div>
             </div>
@@ -171,9 +174,9 @@ export default async function AdminPage({ params }: AdminPageProps) {
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium text-slate-400">
-              Ссылка для участников
+              {dict.admin.inviteLink}
             </span>
-            <CopyButton text={inviteUrl} />
+            <CopyButton text={inviteUrl} dictionary={dict.copyButton} />
           </div>
           <p className="break-all text-sm text-emerald-400">{inviteUrl}</p>
         </div>
@@ -181,7 +184,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
         <div className="rounded-xl border border-slate-700 bg-slate-800/30 p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="font-medium text-white">
-              Участники ({room.participants.length})
+              {dict.admin.participants} ({room.participants.length})
             </span>
             <span
               className={`text-xs ${
@@ -192,7 +195,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     : "text-slate-500"
               }`}
             >
-              макс. {MAX_PARTICIPANTS}
+              {dict.common.max} {MAX_PARTICIPANTS}
             </span>
           </div>
 
@@ -213,9 +216,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
           </div>
 
           {room.participants.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              Пока никто не присоединился
-            </p>
+            <p className="text-sm text-slate-500">{dict.admin.noParticipants}</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {room.participants.map((p) => (
@@ -230,7 +231,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     <span className="truncate">{p.name}</span>
                     {p.sessionId === sessionId && (
                       <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
-                        вы
+                        {dict.common.you}
                       </span>
                     )}
                     {p.email && (
@@ -251,6 +252,8 @@ export default async function AdminPage({ params }: AdminPageProps) {
                       participantName={p.name}
                       notificationsSent={p.notificationsSent}
                       hasEmail={!!p.email}
+                      dictionary={dict.resendButton}
+                      locale={locale}
                     />
                   )}
                 </li>
@@ -259,15 +262,17 @@ export default async function AdminPage({ params }: AdminPageProps) {
           )}
         </div>
 
-        {/* Кнопка "Принять участие" для админа */}
+        {/* "Join as participant" button for admin */}
         {!room.shuffledAt && !isAdminParticipant && (
-          <JoinAsAdminButton inviteUrl={inviteUrl} />
+          <JoinAsAdminButton inviteUrl={inviteUrl} dictionary={dict.admin} />
         )}
 
         <ShuffleButton
           roomId={room.id}
           isShuffled={!!room.shuffledAt}
           participantsCount={room.participants.length}
+          dictionary={dict.shuffleButton}
+          locale={locale}
         />
       </main>
     </div>
