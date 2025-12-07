@@ -1,6 +1,7 @@
 import { prisma } from "../../../../lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { isRoomAdmin } from "../../../actions/queries";
+import { MAX_PARTICIPANTS } from "../../../../lib/constants";
 import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 
@@ -20,11 +21,11 @@ const ShuffleButton = dynamic(
   }
 );
 
+import { JoinAsAdminButton } from "./join-as-admin-button";
+import { AutoRefresh } from "../../../../components/auto-refresh";
 
-const JoinAsAdminButton = dynamic(() =>
-  import("./join-as-admin-button").then((m) => ({
-    default: m.JoinAsAdminButton,
-  }))
+const ResendButton = dynamic(() =>
+  import("./resend-button").then((m) => ({ default: m.ResendButton }))
 );
 
 interface AdminPageProps {
@@ -46,7 +47,15 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const room = await prisma.room.findUnique({
     where: { id },
     include: {
-      participants: true,
+      participants: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          sessionId: true,
+          notificationsSent: true,
+        },
+      },
     },
   });
 
@@ -85,7 +94,8 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const inviteUrl = `${baseUrl}/room/${room.id}/join?token=${room.inviteToken}`;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+      <AutoRefresh />
       <main className="flex w-full max-w-lg flex-col gap-8 px-6 py-12">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="text-5xl">🎄</div>
@@ -173,7 +183,35 @@ export default async function AdminPage({ params }: AdminPageProps) {
             <span className="font-medium text-white">
               Участники ({room.participants.length})
             </span>
+            <span
+              className={`text-xs ${
+                room.participants.length >= MAX_PARTICIPANTS
+                  ? "text-red-400"
+                  : room.participants.length >= MAX_PARTICIPANTS * 0.8
+                    ? "text-amber-400"
+                    : "text-slate-500"
+              }`}
+            >
+              макс. {MAX_PARTICIPANTS}
+            </span>
           </div>
+
+          {/* Progress bar for participant limit */}
+          <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-700">
+            <div
+              className={`h-full transition-all ${
+                room.participants.length >= MAX_PARTICIPANTS
+                  ? "bg-red-500"
+                  : room.participants.length >= MAX_PARTICIPANTS * 0.8
+                    ? "bg-amber-500"
+                    : "bg-emerald-500"
+              }`}
+              style={{
+                width: `${Math.min((room.participants.length / MAX_PARTICIPANTS) * 100, 100)}%`,
+              }}
+            />
+          </div>
+
           {room.participants.length === 0 ? (
             <p className="text-sm text-slate-500">
               Пока никто не присоединился
@@ -183,31 +221,47 @@ export default async function AdminPage({ params }: AdminPageProps) {
               {room.participants.map((p) => (
                 <li
                   key={p.id}
-                  className="flex items-center gap-2 text-slate-300"
+                  className="flex items-center justify-between gap-2 rounded-lg bg-slate-800/50 px-3 py-2"
                 >
-                  <span className="text-lg">
-                    {p.sessionId === sessionId ? "🎅" : "👤"}
-                  </span>
-                  {p.name}
-                  {p.sessionId === sessionId && (
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
-                      вы
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <span className="text-lg">
+                      {p.sessionId === sessionId ? "🎅" : "👤"}
                     </span>
+                    <span className="truncate">{p.name}</span>
+                    {p.sessionId === sessionId && (
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+                        вы
+                      </span>
+                    )}
+                    {p.email && (
+                      <span
+                        className="text-slate-500"
+                        title={`Email: ${p.email}`}
+                      >
+                        📧
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Resend button - only show after shuffle */}
+                  {room.shuffledAt && (
+                    <ResendButton
+                      roomId={room.id}
+                      participantId={p.id}
+                      participantName={p.name}
+                      notificationsSent={p.notificationsSent}
+                      hasEmail={!!p.email}
+                    />
                   )}
                 </li>
               ))}
             </ul>
           )}
-
         </div>
 
         {/* Кнопка "Принять участие" для админа */}
         {!room.shuffledAt && !isAdminParticipant && (
-          <JoinAsAdminButton
-            roomId={room.id}
-            allowWishlist={room.allowWishlist}
-            isShuffled={!!room.shuffledAt}
-          />
+          <JoinAsAdminButton inviteUrl={inviteUrl} />
         )}
 
         <ShuffleButton

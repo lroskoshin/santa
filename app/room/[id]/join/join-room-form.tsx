@@ -61,7 +61,7 @@ export function JoinRoomForm({ roomId, inviteToken, allowWishlist, requireEmail 
             <p className="text-sm text-red-400">{emailError}</p>
           )}
           <p className="text-xs text-slate-500">
-            Организатор получит твой email для связи
+            Сюда прилетит письмо с результатом жеребьёвки. Проверь папку «Спам», если не найдёшь 📬
           </p>
         </div>
       )}

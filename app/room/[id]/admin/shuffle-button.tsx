@@ -16,8 +16,6 @@ export function ShuffleButton({ roomId, isShuffled, participantsCount }: Shuffle
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const canShuffle = participantsCount >= 3 && !isShuffled;
-
   async function handleShuffle() {
     setError(null);
     startTransition(async () => {

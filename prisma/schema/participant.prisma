@@ -1,10 +1,11 @@
 model Participant {
-  id        String  @id @default(cuid())
-  roomId    String
-  name      String
-  email     String?
-  wishlist  String?
-  sessionId String? // anonymous user identifier from cookie
+  id                String  @id @default(cuid())
+  roomId            String
+  name              String
+  email             String?
+  wishlist          String?
+  sessionId         String? // anonymous user identifier from cookie
+  notificationsSent Int     @default(0) // how many times email was sent (max 3)
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 

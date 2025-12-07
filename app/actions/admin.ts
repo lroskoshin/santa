@@ -1,8 +1,12 @@
 "use server";
 
 import { prisma } from "../../lib/prisma";
+import {
+  sendAssignmentNotifications,
+  resendNotificationToParticipant,
+} from "../../lib/emails/send-assignment-notifications";
 import { isRoomAdmin } from "./queries";
-import { shuffle, getUserToken } from "./utils";
+import { shuffle } from "./utils";
 
 /**
  * Провести жеребьёвку в комнате
@@ -58,85 +62,63 @@ export async function shuffleRoom(
     }),
   ]);
 
+  // Send email notifications to participants with emails
+  const participantsWithAssignments = await prisma.participant.findMany({
+    where: { roomId: room.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      notificationsSent: true,
+      givenAssignment: {
+        select: {
+          target: {
+            select: {
+              name: true,
+              wishlist: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Fire and forget - don't block response on email sending
+  sendAssignmentNotifications({
+    roomId: room.id,
+    roomName: room.name,
+    participants: participantsWithAssignments,
+  }).catch((error) => {
+    console.error("Failed to send assignment notifications:", error);
+  });
+
   return { success: true };
 }
 
 /**
- * Присоединиться к комнате как админ (стать участником)
+ * Повторно отправить уведомление участнику (только админ)
  */
-export async function joinAsAdmin(
+export async function resendNotification(
   roomId: string,
-  name: string,
-  wishlist?: string
+  participantId: string
 ): Promise<{ success: boolean; error?: string }> {
   const isAdmin = await isRoomAdmin(roomId);
   if (!isAdmin) {
     return {
       success: false,
-      error: "Только организатор может использовать эту функцию",
+      error: "Только организатор может отправлять уведомления",
     };
   }
 
-  const room = await prisma.room.findUnique({
-    where: { id: roomId },
-    select: {
-      id: true,
-      shuffledAt: true,
-      allowWishlist: true,
-    },
+  // Verify participant belongs to this room
+  const participant = await prisma.participant.findUnique({
+    where: { id: participantId },
+    select: { roomId: true },
   });
 
-  if (!room) {
-    return { success: false, error: "Комната не найдена" };
+  if (!participant || participant.roomId !== roomId) {
+    return { success: false, error: "Участник не найден в этой комнате" };
   }
 
-  if (room.shuffledAt) {
-    return {
-      success: false,
-      error: "Жеребьёвка уже проведена. Нельзя присоединиться.",
-    };
-  }
-
-  const trimmedName = name.trim();
-  if (trimmedName.length < 2 || trimmedName.length > 50) {
-    return {
-      success: false,
-      error: "Имя должно быть от 2 до 50 символов",
-    };
-  }
-
-  const sessionId = await getUserToken();
-
-  // Проверяем, не присоединился ли админ ранее
-  const existingParticipant = await prisma.participant.findUnique({
-    where: {
-      roomId_sessionId: {
-        roomId: room.id,
-        sessionId,
-      },
-    },
-  });
-
-  if (existingParticipant) {
-    // Обновляем данные
-    await prisma.participant.update({
-      where: { id: existingParticipant.id },
-      data: {
-        name: trimmedName,
-        wishlist: room.allowWishlist ? wishlist?.trim() || null : null,
-      },
-    });
-  } else {
-    // Создаём нового участника
-    await prisma.participant.create({
-      data: {
-        roomId: room.id,
-        name: trimmedName,
-        wishlist: room.allowWishlist ? wishlist?.trim() || null : null,
-        sessionId,
-      },
-    });
-  }
-
-  return { success: true };
+  return resendNotificationToParticipant(participantId);
 }

@@ -5,6 +5,7 @@ import {
   joinRoomSchema,
   joinRoomSchemaWithRequiredEmail,
 } from "../../lib/validations/room";
+import { MAX_PARTICIPANTS } from "../../lib/constants";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { getUserToken } from "./utils";
@@ -85,6 +86,17 @@ export async function joinRoom(
       },
     });
   } else {
+    // Check participant limit before creating new one
+    const participantCount = await prisma.participant.count({
+      where: { roomId: room.id },
+    });
+
+    if (participantCount >= MAX_PARTICIPANTS) {
+      return {
+        error: `Достигнут лимит участников (${MAX_PARTICIPANTS}). Обратитесь к организатору.`,
+      };
+    }
+
     await prisma.participant.create({
       data: {
         roomId: room.id,
@@ -98,4 +110,3 @@ export async function joinRoom(
 
   redirect(`/room/${room.id}/joined`);
 }
-

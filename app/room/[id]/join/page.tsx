@@ -38,7 +38,7 @@ export default async function JoinPage({ params, searchParams }: JoinPageProps) 
   // Если жеребьёвка уже проведена, показываем сообщение
   if (room.shuffledAt) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
+      <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
         <main className="flex w-full max-w-md flex-col gap-6 px-6 text-center">
           <div className="text-6xl">🚫</div>
           <h1 className="text-2xl font-bold text-white">
@@ -79,7 +79,7 @@ export default async function JoinPage({ params, searchParams }: JoinPageProps) 
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
       <main className="flex w-full max-w-md flex-col gap-8 px-6">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="text-5xl">🎁</div>

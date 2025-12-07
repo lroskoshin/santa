@@ -9,7 +9,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
       <main className="flex w-full max-w-md flex-col items-center gap-12 px-6 py-12">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="text-6xl">🎅</div>
@@ -26,6 +26,24 @@ export default async function Home() {
         <p className="text-sm text-slate-500">
           Каждый участник узнает, кому он дарит подарок 🎁
         </p>
+
+        <div className="w-full border-t border-slate-800 pt-6">
+          <Link
+            href="/shuffle"
+            className="flex items-center gap-3 w-full rounded-xl border border-slate-700 bg-slate-800/30 p-4 transition-all hover:border-slate-600 hover:bg-slate-800/50 group"
+          >
+            <span className="text-2xl">🎲</span>
+            <div className="flex flex-col gap-0.5 flex-1">
+              <span className="font-medium text-slate-300 group-hover:text-white transition-colors">
+                У меня уже есть список
+              </span>
+              <span className="text-sm text-slate-500">
+                Быстро перемешать имена без регистрации
+              </span>
+            </div>
+            <span className="text-slate-500 group-hover:text-slate-400 transition-colors">→</span>
+          </Link>
+        </div>
 
         {totalRooms > 0 && (
           <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">

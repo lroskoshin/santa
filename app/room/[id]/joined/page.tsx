@@ -2,6 +2,7 @@ import { prisma } from "../../../../lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { AutoRefresh } from "../../../../components/auto-refresh";
 
 interface JoinedPageProps {
   params: Promise<{ id: string }>;
@@ -65,7 +66,8 @@ export default async function JoinedPage({ params }: JoinedPageProps) {
   const target = participant.givenAssignment?.target;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+      <AutoRefresh />
       <main className="flex w-full max-w-md flex-col gap-8 px-6 py-12">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="text-6xl">{isShuffled ? "🎁" : "🎄"}</div>
@@ -142,6 +144,28 @@ export default async function JoinedPage({ params }: JoinedPageProps) {
             </p>
           )}
         </div>
+
+        {!isShuffled && (
+          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-500/5 to-rose-500/5 p-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⏳</span>
+              <div className="text-sm">
+                <p className="font-medium text-amber-400/90">Ожидай жеребьёвку</p>
+                <p className="mt-1 text-slate-400">
+                  Скоро на этой странице появится имя человека, для которого ты будешь Тайным Сантой.
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Если организатор уже провёл жеребьёвку, а здесь ничего не изменилось — просто обнови страницу 🔄
+                </p>
+                {participant.email && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Письмо придёт на {participant.email} — проверь папку «Спам», если не найдёшь 📬
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {isShuffled && participant.wishlist && (
           <div className="rounded-xl border border-slate-700 bg-slate-800/20 p-4">
