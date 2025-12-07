@@ -1,10 +1,3 @@
-# WeSanta — закрыто на время разработки
-# TODO: После релиза открыть для индексации
-
 User-agent: *
-Disallow: /
-
-# После релиза заменить на:
-# User-agent: *
-# Allow: /
-# Sitemap: https://wesanta.club/sitemap.xml
+Allow: /
+Sitemap: https://wesanta.club/sitemap.xml

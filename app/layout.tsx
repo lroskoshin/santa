@@ -69,15 +69,16 @@ export const metadata: Metadata = {
     creator: "@wesanta",
   },
 
-  // Robots — закрыто на время разработки
-  // TODO: После релиза изменить на index: true, follow: true
+  // Robots — открыто для индексации
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
     googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
 
