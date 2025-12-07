@@ -1,6 +1,9 @@
+import { connection } from "next/server";
 import { getTotalRoomsCount } from "../actions/queries";
 
 export async function RoomsCounter() {
+  // Не пре-рендерить при билде — ждём реального запроса
+  await connection();
   const totalRooms = await getTotalRoomsCount();
 
   if (totalRooms === 0) {
