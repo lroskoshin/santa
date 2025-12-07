@@ -54,13 +54,28 @@ export async function shuffleRoom(
     };
   });
 
-  await prisma.$transaction([
-    prisma.assignment.createMany({ data: assignments }),
-    prisma.room.update({
-      where: { id: roomId },
+  // Use atomic compare-and-set to prevent race conditions:
+  // Only one concurrent request can successfully update shuffledAt from null
+  const shuffleResult = await prisma.$transaction(async (tx) => {
+    // Atomically claim the shuffle by updating shuffledAt only if it's still null
+    const updated = await tx.room.updateMany({
+      where: { id: roomId, shuffledAt: null },
       data: { shuffledAt: new Date() },
-    }),
-  ]);
+    });
+
+    // If no rows were updated, another request already claimed the shuffle
+    if (updated.count === 0) {
+      return { claimed: false as const };
+    }
+
+    // We won the race - safe to create assignments
+    await tx.assignment.createMany({ data: assignments });
+    return { claimed: true as const };
+  });
+
+  if (!shuffleResult.claimed) {
+    return { success: false, error: "Жеребьёвка уже была проведена" };
+  }
 
   // Send email notifications to participants with emails
   const participantsWithAssignments = await prisma.participant.findMany({

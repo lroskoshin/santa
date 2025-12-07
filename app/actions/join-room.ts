@@ -7,6 +7,7 @@ import {
 } from "../../lib/validations/room";
 import { MAX_PARTICIPANTS } from "../../lib/constants";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { getUserToken } from "./utils";
 import type { ActionState } from "./types";
@@ -86,26 +87,29 @@ export async function joinRoom(
       },
     });
   } else {
-    // Check participant limit before creating new one
-    const participantCount = await prisma.participant.count({
-      where: { roomId: room.id },
-    });
+    // Atomic check-and-create to prevent race condition exceeding MAX_PARTICIPANTS
+    // The INSERT only succeeds if current count < MAX_PARTICIPANTS
+    const newId = nanoid(25);
+    const wishlistValue = room.allowWishlist ? (wishlist ?? null) : null;
 
-    if (participantCount >= MAX_PARTICIPANTS) {
+    const inserted = await prisma.$executeRaw`
+      INSERT INTO "Participant" ("id", "roomId", "name", "email", "wishlist", "sessionId", "notificationsSent")
+      SELECT
+        ${newId},
+        ${room.id},
+        ${name},
+        ${email ?? null},
+        ${wishlistValue},
+        ${sessionId},
+        0
+      WHERE (SELECT COUNT(*) FROM "Participant" WHERE "roomId" = ${room.id}) < ${MAX_PARTICIPANTS}
+    `;
+
+    if (inserted === 0) {
       return {
         error: `Достигнут лимит участников (${MAX_PARTICIPANTS}). Обратитесь к организатору.`,
       };
     }
-
-    await prisma.participant.create({
-      data: {
-        roomId: room.id,
-        name,
-        email: email ?? null,
-        wishlist: room.allowWishlist ? wishlist : null,
-        sessionId,
-      },
-    });
   }
 
   redirect(`/room/${room.id}/joined`);
