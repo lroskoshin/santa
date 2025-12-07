@@ -7,6 +7,7 @@ import { locales, getLocalizedPath, type Locale } from "@/lib/i18n";
 import { LocaleSwitcher } from "./components/locale-switcher";
 
 const YANDEX_METRIKA_ID = 105719051;
+const GA_TRACKING_ID = "G-C9QN9JDZBX";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -220,6 +221,24 @@ export default async function RootLayout({
             </a>
           </div>
         </footer>
+
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_TRACKING_ID}');
+            `,
+          }}
+        />
 
         {/* Yandex.Metrika counter */}
         <Script
