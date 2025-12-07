@@ -26,6 +26,7 @@ export default async function JoinPage({ params, searchParams }: JoinPageProps) 
       name: true,
       inviteToken: true,
       allowWishlist: true,
+      requireEmail: true,
       shuffledAt: true,
     },
   });
@@ -95,6 +96,7 @@ export default async function JoinPage({ params, searchParams }: JoinPageProps) 
             roomId={room.id}
             inviteToken={token}
             allowWishlist={room.allowWishlist}
+            requireEmail={room.requireEmail}
           />
         </div>
 

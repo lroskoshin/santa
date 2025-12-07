@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { shuffleRoom } from "../../../actions/room";
+import { shuffleRoom } from "../../../actions/admin";
 import { useRouter } from "next/navigation";
 
 interface ShuffleButtonProps {

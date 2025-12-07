@@ -1,6 +1,7 @@
 "use client";
 
-import { createRoom, type ActionState } from "../actions/room";
+import { createRoom } from "../actions/create-room";
+import type { ActionState } from "../actions/types";
 import { useActionState } from "react";
 
 export function CreateRoomForm() {
@@ -34,17 +35,30 @@ export function CreateRoomForm() {
         )}
       </div>
 
-      <label className="flex items-center gap-3 cursor-pointer group">
-        <input
-          type="checkbox"
-          name="allowWishlist"
-          defaultChecked
-          className="h-5 w-5 rounded border-slate-600 bg-slate-800/50 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer"
-        />
-        <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
-          Разрешить участникам указывать пожелания к подарку
-        </span>
-      </label>
+      <div className="flex flex-col gap-3">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            name="allowWishlist"
+            defaultChecked
+            className="h-5 w-5 rounded border-slate-600 bg-slate-800/50 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer"
+          />
+          <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
+            Разрешить участникам указывать пожелания к подарку
+          </span>
+        </label>
+
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            name="requireEmail"
+            className="h-5 w-5 rounded border-slate-600 bg-slate-800/50 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer"
+          />
+          <span className="text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
+            Требовать email от участников
+          </span>
+        </label>
+      </div>
 
       <button
         type="submit"

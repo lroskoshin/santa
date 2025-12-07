@@ -1,15 +1,17 @@
 "use client";
 
-import { joinRoom, type ActionState } from "../../../actions/room";
+import { joinRoom } from "../../../actions/join-room";
+import type { ActionState } from "../../../actions/types";
 import { useActionState } from "react";
 
 interface JoinRoomFormProps {
   roomId: string;
   inviteToken: string;
   allowWishlist: boolean;
+  requireEmail: boolean;
 }
 
-export function JoinRoomForm({ roomId, inviteToken, allowWishlist }: JoinRoomFormProps) {
+export function JoinRoomForm({ roomId, inviteToken, allowWishlist, requireEmail }: JoinRoomFormProps) {
   const joinRoomWithId = joinRoom.bind(null, roomId, inviteToken);
   
   const [state, formAction, isPending] = useActionState<ActionState | null, FormData>(
@@ -18,6 +20,7 @@ export function JoinRoomForm({ roomId, inviteToken, allowWishlist }: JoinRoomFor
   );
 
   const nameError = state?.fieldErrors?.name?.[0];
+  const emailError = state?.fieldErrors?.email?.[0];
   const wishlistError = state?.fieldErrors?.wishlist?.[0];
 
   return (
@@ -39,6 +42,29 @@ export function JoinRoomForm({ roomId, inviteToken, allowWishlist }: JoinRoomFor
           <p className="text-sm text-red-400">{nameError}</p>
         )}
       </div>
+
+      {requireEmail && (
+        <div className="flex flex-col gap-2">
+          <label htmlFor="email" className="text-sm font-medium text-slate-300">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+            maxLength={100}
+            className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800/50 px-4 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+          />
+          {emailError && (
+            <p className="text-sm text-red-400">{emailError}</p>
+          )}
+          <p className="text-xs text-slate-500">
+            Организатор получит твой email для связи
+          </p>
+        </div>
+      )}
 
       {allowWishlist && (
         <div className="flex flex-col gap-2">
@@ -63,7 +89,7 @@ export function JoinRoomForm({ roomId, inviteToken, allowWishlist }: JoinRoomFor
         </div>
       )}
 
-      {state?.error && !nameError && !wishlistError && (
+      {state?.error && !nameError && !emailError && !wishlistError && (
         <p className="text-sm text-red-400 text-center">{state.error}</p>
       )}
 

@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "pnpm prisma generate && next build",
+    "build:analyze": "pnpm prisma generate && ANALYZE=true next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/bundle-analyzer": "^16.0.7",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "dotenv": "^17.2.3",
