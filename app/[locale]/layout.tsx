@@ -162,7 +162,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} flex min-h-screen flex-col antialiased`}
       >
         {/* Beta Banner */}
-        <div className="border-b border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10">
+        <div className="border-b border-amber-500/20 bg-linear-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2.5 text-center text-sm">
             <span className="inline-flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
