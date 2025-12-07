@@ -44,8 +44,8 @@ export async function joinRoom(
 
   const rawData = {
     name: formData.get("name"),
-    email: formData.get("email") || undefined,
-    wishlist: formData.get("wishlist") || undefined,
+    email: formData.get("email") ?? "",
+    wishlist: formData.get("wishlist") ?? "",
   };
 
   const schema = room.requireEmail
