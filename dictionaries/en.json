@@ -108,6 +108,7 @@
     "joinHint": "Want to give and receive gifts too?"
   },
   "shuffle": {
+    "back": "Back to home",
     "title": "Quick shuffle",
     "subtitle": "Enter participant names separated by commas — we'll instantly shuffle them",
     "namesLabel": "Participant names",

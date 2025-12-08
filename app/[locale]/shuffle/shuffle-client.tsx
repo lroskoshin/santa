@@ -104,7 +104,7 @@ export function ShuffleClient({ dictionary, locale }: ShuffleClientProps) {
           className="flex items-center gap-2 self-start text-slate-400 transition-colors hover:text-slate-300"
         >
           <span>←</span>
-          <span className="text-sm">{dictionary.hint.split(".")[0]}</span>
+          <span className="text-sm">{dictionary.back}</span>
         </Link>
 
         <div className="flex flex-col items-center gap-4 text-center">
