@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
 
@@ -19,9 +18,12 @@ export function LocaleSwitcher({ currentLocale }: LocaleSwitcherProps) {
   const ruPath = `/ru${pathnameWithoutLocale}`;
   const enPath = `/en${pathnameWithoutLocale}`;
 
+  // Use <a> instead of <Link> to force full page reload
+  // This ensures proxy middleware runs and sets the locale cookie correctly
+  // With <Link>, soft navigation in production can skip the proxy
   return (
     <div className="inline-flex rounded-full bg-slate-800/80 p-0.5 text-xs font-medium">
-      <Link
+      <a
         href={ruPath}
         className={`rounded-full px-3 py-1.5 transition-all ${
           currentLocale === "ru"
@@ -30,8 +32,8 @@ export function LocaleSwitcher({ currentLocale }: LocaleSwitcherProps) {
         }`}
       >
         RU
-      </Link>
-      <Link
+      </a>
+      <a
         href={enPath}
         className={`rounded-full px-3 py-1.5 transition-all ${
           currentLocale === "en"
@@ -40,7 +42,7 @@ export function LocaleSwitcher({ currentLocale }: LocaleSwitcherProps) {
         }`}
       >
         EN
-      </Link>
+      </a>
     </div>
   );
 }
