@@ -9,7 +9,6 @@ Secret Santa organizer for friends and colleagues.
 - [Next.js 15](https://nextjs.org) — React framework
 - [Prisma](https://prisma.io) — Database ORM
 - [Tailwind CSS](https://tailwindcss.com) — Styling
-- [shadcn/ui](https://ui.shadcn.com) — UI components
 
 ## Getting Started
 
