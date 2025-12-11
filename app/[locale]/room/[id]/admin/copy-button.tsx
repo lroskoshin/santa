@@ -26,4 +26,3 @@ export function CopyButton({ text, dictionary }: CopyButtonProps) {
     </button>
   );
 }
-

@@ -38,4 +38,3 @@ export function AutoRefresh({ intervalMs = 2 * 60 * 1000 }: AutoRefreshProps) {
 
   return null;
 }
-
