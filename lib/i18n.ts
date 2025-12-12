@@ -19,5 +19,10 @@ export function getLocalizedPath(path: string, locale: Locale): string {
   }
 
   // Other locales get prefix
+  // For root path, return /en instead of /en/
+  if (normalizedPath === "/") {
+    return `/${locale}`;
+  }
+
   return `/${locale}${normalizedPath}`;
 }
