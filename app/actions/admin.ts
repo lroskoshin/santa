@@ -8,6 +8,9 @@ import {
 import { isRoomAdmin } from "./queries";
 import { shuffle } from "./utils";
 import type { Locale } from "@/lib/i18n";
+import { nanoid } from "nanoid";
+import { MAX_PARTICIPANTS } from "@/lib/constants";
+import { revalidatePath } from "next/cache";
 
 const errorMessages = {
   ru: {
@@ -17,6 +20,10 @@ const errorMessages = {
     minParticipants: "Нужно минимум 3 участника",
     notAdminNotify: "Только организатор может отправлять уведомления",
     participantNotFound: "Участник не найден в этой комнате",
+    notAdminAdd: "Только организатор может добавлять участников",
+    nameRequired: "Имя обязательно",
+    limitReached: (max: number) =>
+      `Достигнут лимит участников (${max}). Нельзя добавить больше.`,
   },
   en: {
     notAdmin: "Only the organizer can run the draw",
@@ -25,6 +32,10 @@ const errorMessages = {
     minParticipants: "Need at least 3 participants",
     notAdminNotify: "Only the organizer can send notifications",
     participantNotFound: "Participant not found in this room",
+    notAdminAdd: "Only the organizer can add participants",
+    nameRequired: "Name is required",
+    limitReached: (max: number) =>
+      `Participant limit reached (${max}). Cannot add more.`,
   },
 };
 
@@ -166,4 +177,73 @@ export async function resendNotification(
   }
 
   return resendNotificationToParticipant(participantId);
+}
+
+/**
+ * Add participant by admin (before shuffle)
+ */
+export async function addParticipantByAdmin(
+  roomId: string,
+  locale: Locale = "ru",
+  _prevState: { success: boolean; error?: string } | null,
+  formData: FormData
+): Promise<{ success: boolean; error?: string }> {
+  const messages = errorMessages[locale];
+
+  const isAdmin = await isRoomAdmin(roomId);
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: messages.notAdminAdd,
+    };
+  }
+
+  const room = await prisma.room.findUnique({
+    where: { id: roomId },
+  });
+
+  if (!room) {
+    return { success: false, error: messages.roomNotFound };
+  }
+
+  if (room.shuffledAt) {
+    return { success: false, error: messages.alreadyShuffled };
+  }
+
+  const name = formData.get("name")?.toString().trim();
+  const email = formData.get("email")?.toString().trim() || null;
+  const wishlist = formData.get("wishlist")?.toString().trim() || null;
+
+  if (!name) {
+    return { success: false, error: messages.nameRequired };
+  }
+
+  // Atomic check-and-create to prevent race condition exceeding MAX_PARTICIPANTS
+  const newId = nanoid(25);
+  const wishlistValue = room.allowWishlist ? wishlist : null;
+
+  const inserted = await prisma.$executeRaw`
+    INSERT INTO "Participant" ("id", "roomId", "name", "email", "wishlist", "sessionId", "notificationsSent")
+    SELECT
+      ${newId},
+      ${room.id},
+      ${name},
+      ${email},
+      ${wishlistValue},
+      NULL,
+      0
+    WHERE (SELECT COUNT(*) FROM "Participant" WHERE "roomId" = ${room.id}) < ${MAX_PARTICIPANTS}
+  `;
+
+  if (inserted === 0) {
+    return {
+      success: false,
+      error: messages.limitReached(MAX_PARTICIPANTS),
+    };
+  }
+
+  // Revalidate admin page to show the new participant
+  revalidatePath(`/${locale}/room/${roomId}/admin`);
+
+  return { success: true };
 }

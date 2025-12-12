@@ -71,7 +71,7 @@ export default async function JoinedPage({ params }: JoinedPageProps) {
   const isAdmin = await isRoomAdmin(room.id);
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center">
       <AutoRefresh />
       <main className="flex w-full max-w-md flex-col gap-8 px-6 py-12">
         <div className="flex flex-col items-center gap-4 text-center">

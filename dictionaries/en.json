@@ -17,7 +17,9 @@
     "beta": "Beta",
     "betaMessage": "Project in development — if something goes wrong, my deepest apologies! 🙏",
     "telegramLink": "Message on Telegram",
-    "telegram": "Telegram"
+    "telegram": "Telegram",
+    "musicPlay": "Play holiday music",
+    "musicPause": "Pause music"
   },
   "home": {
     "title": "Secret Santa",
@@ -105,7 +107,22 @@
     "participants": "Participants",
     "noParticipants": "No one has joined yet",
     "joinAsParticipant": "Join as participant",
-    "joinHint": "Want to give and receive gifts too?"
+    "joinHint": "Want to give and receive gifts too?",
+    "addParticipant": "Add participant",
+    "addManually": "Add participant manually",
+    "name": "Name",
+    "namePlaceholder": "Participant name",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "wishlist": "Gift wishes",
+    "wishlistPlaceholder": "What they would like to receive",
+    "optional": "(optional)",
+    "cancel": "Cancel",
+    "add": "Add",
+    "adding": "Adding...",
+    "assignmentInfo": "{santa} is Secret Santa for {target}",
+    "clickToSeeAssignment": "Click to see assignment",
+    "noAssignment": "Assignment not found"
   },
   "shuffle": {
     "back": "Back to home",

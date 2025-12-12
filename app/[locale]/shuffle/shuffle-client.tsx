@@ -97,7 +97,7 @@ export function ShuffleClient({ dictionary, locale }: ShuffleClientProps) {
   }, [handleShuffle]);
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center">
       <main className="flex w-full max-w-lg flex-col items-center gap-8 px-6 py-12">
         <Link
           href={getLocalizedPath("/", locale)}

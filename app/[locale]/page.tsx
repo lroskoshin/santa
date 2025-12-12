@@ -15,7 +15,7 @@ export default async function Home({ params }: HomeProps) {
   const dict = await getDictionary(locale);
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center">
       <main className="flex w-full max-w-md flex-col items-center gap-12 px-6 py-12">
         {/* Static content */}
         <div className="flex flex-col items-center gap-4 text-center">

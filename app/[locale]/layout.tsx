@@ -5,6 +5,8 @@ import "../globals.css";
 import { getDictionary } from "./dictionaries";
 import { locales, getLocalizedPath, isValidLocale, defaultLocale, type Locale } from "@/lib/i18n";
 import { LocaleSwitcher } from "./components/locale-switcher";
+import { MusicPlayer } from "./components/music-player";
+import { Snowflakes } from "@/components/snowflakes";
 
 const YANDEX_METRIKA_ID = 105719051;
 const GA_TRACKING_ID = "G-C9QN9JDZBX";
@@ -163,8 +165,10 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} flex min-h-screen flex-col antialiased`}
       >
+        <Snowflakes />
+
         {/* Beta Banner */}
-        <div className="border-b border-amber-500/20 bg-linear-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10">
+        <div className="relative z-10 border-b border-amber-500/20 bg-linear-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2.5 text-center text-sm">
             <span className="inline-flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
@@ -195,32 +199,46 @@ export default async function RootLayout({
         </div>
 
         {/* Language Switcher */}
-        <div className="flex justify-start px-4 pt-4 pb-2 bg-[#0c1222]">
+        <div className="relative z-10 flex items-center justify-between px-4 pt-4 pb-2">
           <LocaleSwitcher currentLocale={locale} />
         </div>
 
-        <main className="flex flex-1 flex-col">{children}</main>
+        {/* Music Player (fixed position) */}
+        <MusicPlayer />
 
-        <footer className="border-t border-slate-800 bg-[#0c1222] py-6">
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-            <span>WeSanta © {new Date().getFullYear()}</span>
-            <span>·</span>
-            <a
-              href="https://t.me/wesantaclub"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-slate-400 transition-colors hover:text-sky-400"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-4 w-4"
-                aria-hidden="true"
+        <main className="relative z-10 flex flex-1 flex-col">{children}</main>
+
+        {/* Snowy Footer */}
+        <footer className="relative z-10 mt-8">
+          {/* Wavy snow edge */}
+          <div 
+            className="h-12 w-full"
+            style={{
+              background: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C150,90 350,0 500,40 C650,80 800,0 1000,60 C1100,90 1150,50 1200,80 L1200,120 L0,120 Z' fill='%23ffffff'/%3E%3C/svg%3E") no-repeat bottom`,
+              backgroundSize: '100% 100%',
+            }}
+          />
+          <div className="bg-white py-6">
+            <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
+              <span>WeSanta © {new Date().getFullYear()}</span>
+              <span className="text-slate-400">·</span>
+              <a
+                href="https://t.me/wesantaclub"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-slate-500 transition-colors hover:text-sky-500"
               >
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-              </svg>
-              {dict.layout.telegram}
-            </a>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                </svg>
+                {dict.layout.telegram}
+              </a>
+            </div>
           </div>
         </footer>
 

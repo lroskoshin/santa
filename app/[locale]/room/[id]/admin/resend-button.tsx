@@ -52,11 +52,7 @@ export function ResendButton({
   }
 
   if (!hasEmail) {
-    return (
-      <span className="text-xs text-slate-600" title={dictionary.noEmail}>
-        —
-      </span>
-    );
+    return null;
   }
 
   if (localCount >= MAX_NOTIFICATIONS) {

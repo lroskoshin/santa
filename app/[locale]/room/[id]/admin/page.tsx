@@ -25,10 +25,13 @@ const ShuffleButton = dynamic(
 
 import { JoinAsAdminButton } from "./join-as-admin-button";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { AddParticipantForm } from "./add-participant-form";
 
 const ResendButton = dynamic(() =>
   import("./resend-button").then((m) => ({ default: m.ResendButton }))
 );
+
+import { ParticipantAssignmentButton } from "./participant-assignment-popover";
 
 interface AdminPageProps {
   params: Promise<{ id: string; locale: Locale }>;
@@ -59,8 +62,31 @@ export default async function AdminPage({ params }: AdminPageProps) {
           notificationsSent: true,
         },
       },
+      assignments: {
+        select: {
+          santaId: true,
+          santa: {
+            select: {
+              name: true,
+            },
+          },
+          target: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
+
+  // Create a map of participant ID to their target's name
+  const assignmentsMap = new Map<string, string>();
+  if (room) {
+    for (const assignment of room.assignments) {
+      assignmentsMap.set(assignment.santaId, assignment.target.name);
+    }
+  }
 
   if (!room) {
     notFound();
@@ -97,7 +123,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const inviteUrl = `${baseUrl}${getLocalizedPath(`/room/${room.id}/join?token=${room.inviteToken}`, locale)}`;
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-[#0c1222]">
+    <div className="flex flex-1 items-center justify-center">
       <AutoRefresh />
       <main className="flex w-full max-w-lg flex-col gap-8 px-6 py-12">
         <div className="flex flex-col items-center gap-4 text-center">
@@ -224,7 +250,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                   key={p.id}
                   className="flex items-center justify-between gap-2 rounded-lg bg-slate-800/50 px-3 py-2"
                 >
-                  <div className="flex items-center gap-2 text-slate-300">
+                  <div className="flex items-center gap-2 text-slate-300 min-w-0 flex-1">
                     <span className="text-lg">
                       {p.sessionId === sessionId ? "🎅" : "👤"}
                     </span>
@@ -244,23 +270,41 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     )}
                   </div>
 
-                  {/* Resend button - only show after shuffle */}
+                  {/* Action buttons - only show after shuffle */}
                   {room.shuffledAt && (
-                    <ResendButton
-                      roomId={room.id}
-                      participantId={p.id}
-                      participantName={p.name}
-                      notificationsSent={p.notificationsSent}
-                      hasEmail={!!p.email}
-                      dictionary={dict.resendButton}
-                      locale={locale}
-                    />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <ParticipantAssignmentButton
+                        santaName={p.name}
+                        targetName={assignmentsMap.get(p.id) ?? null}
+                        dictionary={dict.admin}
+                      />
+                      <ResendButton
+                        roomId={room.id}
+                        participantId={p.id}
+                        participantName={p.name}
+                        notificationsSent={p.notificationsSent}
+                        hasEmail={!!p.email}
+                        dictionary={dict.resendButton}
+                        locale={locale}
+                      />
+                    </div>
                   )}
                 </li>
               ))}
             </ul>
           )}
         </div>
+
+        {/* Add participant manually - only before shuffle */}
+        {!room.shuffledAt && (
+          <AddParticipantForm
+            roomId={room.id}
+            allowWishlist={room.allowWishlist}
+            requireEmail={room.requireEmail}
+            dictionary={dict.admin}
+            locale={locale}
+          />
+        )}
 
         {/* "Join as participant" button for admin */}
         {!room.shuffledAt && !isAdminParticipant && (

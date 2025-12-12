@@ -3,7 +3,7 @@ import { Snowflakes } from "@/components/snowflakes";
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-[#0c1222]">
+    <div className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden">
       {/* Animated snowflakes */}
       <Snowflakes />
 
