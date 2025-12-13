@@ -16,13 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       sitemapEntries.push({
         url: `${baseUrl}${localizedPath}`,
         lastModified,
-        changeFrequency: "weekly",
+        changeFrequency: "daily",
         priority: route === "/" ? 1 : 0.8,
-        alternates: {
-          languages: Object.fromEntries(
-            locales.map((l) => [l, `${baseUrl}${getLocalizedPath(route, l)}`])
-          ),
-        },
       });
     }
   }
