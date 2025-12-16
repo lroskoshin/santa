@@ -58,6 +58,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
           id: true,
           name: true,
           email: true,
+          wishlist: true,
           sessionId: true,
           notificationsSent: true,
         },
@@ -73,6 +74,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
           target: {
             select: {
               name: true,
+              wishlist: true,
             },
           },
         },
@@ -80,11 +82,14 @@ export default async function AdminPage({ params }: AdminPageProps) {
     },
   });
 
-  // Create a map of participant ID to their target's name
-  const assignmentsMap = new Map<string, string>();
+  // Create a map of participant ID to their target info
+  const assignmentsMap = new Map<string, { name: string; wishlist: string | null }>();
   if (room) {
     for (const assignment of room.assignments) {
-      assignmentsMap.set(assignment.santaId, assignment.target.name);
+      assignmentsMap.set(assignment.santaId, {
+        name: assignment.target.name,
+        wishlist: assignment.target.wishlist,
+      });
     }
   }
 
@@ -248,47 +253,50 @@ export default async function AdminPage({ params }: AdminPageProps) {
               {room.participants.map((p) => (
                 <li
                   key={p.id}
-                  className="flex items-center justify-between gap-2 rounded-lg bg-slate-800/50 px-3 py-2"
+                  className="rounded-lg bg-slate-800/50 px-3 py-2"
                 >
-                  <div className="flex items-center gap-2 text-slate-300 min-w-0 flex-1">
-                    <span className="text-lg">
-                      {p.sessionId === sessionId ? "🎅" : "👤"}
-                    </span>
-                    <span className="truncate">{p.name}</span>
-                    {p.sessionId === sessionId && (
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
-                        {dict.common.you}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-slate-300 min-w-0 flex-1">
+                      <span className="text-lg">
+                        {p.sessionId === sessionId ? "🎅" : "👤"}
                       </span>
-                    )}
-                    {p.email && (
-                      <span
-                        className="text-slate-500"
-                        title={`Email: ${p.email}`}
-                      >
-                        📧
-                      </span>
+                      <span className="truncate">{p.name}</span>
+                      {p.sessionId === sessionId && (
+                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+                          {dict.common.you}
+                        </span>
+                      )}
+                      {p.email && (
+                        <span
+                          className="text-slate-500"
+                          title={`Email: ${p.email}`}
+                        >
+                          📧
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action buttons - only show after shuffle */}
+                    {room.shuffledAt && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <ParticipantAssignmentButton
+                          santaName={p.name}
+                          targetName={assignmentsMap.get(p.id)?.name ?? null}
+                          targetWishlist={assignmentsMap.get(p.id)?.wishlist ?? null}
+                          dictionary={dict.admin}
+                        />
+                        <ResendButton
+                          roomId={room.id}
+                          participantId={p.id}
+                          participantName={p.name}
+                          notificationsSent={p.notificationsSent}
+                          hasEmail={!!p.email}
+                          dictionary={dict.resendButton}
+                          locale={locale}
+                        />
+                      </div>
                     )}
                   </div>
-
-                  {/* Action buttons - only show after shuffle */}
-                  {room.shuffledAt && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <ParticipantAssignmentButton
-                        santaName={p.name}
-                        targetName={assignmentsMap.get(p.id) ?? null}
-                        dictionary={dict.admin}
-                      />
-                      <ResendButton
-                        roomId={room.id}
-                        participantId={p.id}
-                        participantName={p.name}
-                        notificationsSent={p.notificationsSent}
-                        hasEmail={!!p.email}
-                        dictionary={dict.resendButton}
-                        locale={locale}
-                      />
-                    </div>
-                  )}
                 </li>
               ))}
             </ul>

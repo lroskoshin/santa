@@ -5,16 +5,20 @@ import { useState, useRef, useEffect } from "react";
 interface ParticipantAssignmentButtonProps {
   santaName: string;
   targetName: string | null;
+  targetWishlist: string | null;
   dictionary: {
     assignmentInfo: string;
     noAssignment: string;
     clickToSeeAssignment: string;
+    wishes: string;
+    noWishes: string;
   };
 }
 
 export function ParticipantAssignmentButton({
   santaName,
   targetName,
+  targetWishlist,
   dictionary,
 }: ParticipantAssignmentButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,6 +51,10 @@ export function ParticipantAssignmentButton({
         .replace("{santa}", santaName)
         .replace("{target}", targetName)
     : dictionary.noAssignment;
+
+  const noWishesMessage = targetName
+    ? dictionary.noWishes.replace("{name}", targetName)
+    : "";
 
   return (
     <div className="relative">
@@ -87,11 +95,30 @@ export function ParticipantAssignmentButton({
             <p className="text-sm text-slate-200 leading-relaxed">{message}</p>
           </div>
           {targetName && (
-            <div className="mt-3 flex items-center justify-center gap-3 rounded-md bg-slate-900/50 px-4 py-3 border border-slate-700">
-              <span className="font-semibold text-emerald-400">{santaName}</span>
-              <span className="text-2xl">🎅→🎁</span>
-              <span className="font-semibold text-amber-400">{targetName}</span>
-            </div>
+            <>
+              <div className="mt-3 flex items-center justify-center gap-3 rounded-md bg-slate-900/50 px-4 py-3 border border-slate-700">
+                <span className="font-semibold text-emerald-400">{santaName}</span>
+                <span className="text-2xl">🎅→🎁</span>
+                <span className="font-semibold text-amber-400">{targetName}</span>
+              </div>
+
+              {/* Target's wishlist */}
+              <div className="mt-3 rounded-md border border-amber-500/20 bg-slate-900/50 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">💝</span>
+                  <span className="text-xs font-medium text-amber-400">
+                    {dictionary.wishes}
+                  </span>
+                </div>
+                {targetWishlist ? (
+                  <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {targetWishlist}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">{noWishesMessage}</p>
+                )}
+              </div>
+            </>
           )}
         </div>
       )}

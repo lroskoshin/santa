@@ -122,7 +122,8 @@
     "adding": "Adding...",
     "assignmentInfo": "{santa} is Secret Santa for {target}",
     "clickToSeeAssignment": "Click to see assignment",
-    "noAssignment": "Assignment not found"
+    "noAssignment": "Assignment not found",
+    "clickToSeeWishes": "View wishes"
   },
   "shuffle": {
     "back": "Back to home",

@@ -122,7 +122,8 @@
     "adding": "Добавляем...",
     "assignmentInfo": "{santa} будет Тайным Сантой для {target}",
     "clickToSeeAssignment": "Нажмите, чтобы посмотреть назначение",
-    "noAssignment": "Назначение не найдено"
+    "noAssignment": "Назначение не найдено",
+    "clickToSeeWishes": "Посмотреть пожелания"
   },
   "shuffle": {
     "back": "На главную",
