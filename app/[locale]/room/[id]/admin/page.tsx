@@ -32,6 +32,7 @@ const ResendButton = dynamic(() =>
 );
 
 import { ParticipantAssignmentButton } from "./participant-assignment-popover";
+import { ParticipantWishlistButton } from "./participant-wishlist-popover";
 
 interface AdminPageProps {
   params: Promise<{ id: string; locale: Locale }>;
@@ -276,26 +277,36 @@ export default async function AdminPage({ params }: AdminPageProps) {
                       )}
                     </div>
 
-                    {/* Action buttons - only show after shuffle */}
-                    {room.shuffledAt && (
-                      <div className="flex items-center gap-2 shrink-0">
-                        <ParticipantAssignmentButton
-                          santaName={p.name}
-                          targetName={assignmentsMap.get(p.id)?.name ?? null}
-                          targetWishlist={assignmentsMap.get(p.id)?.wishlist ?? null}
-                          dictionary={dict.admin}
-                        />
-                        <ResendButton
-                          roomId={room.id}
-                          participantId={p.id}
-                          participantName={p.name}
-                          notificationsSent={p.notificationsSent}
-                          hasEmail={!!p.email}
-                          dictionary={dict.resendButton}
-                          locale={locale}
-                        />
-                      </div>
-                    )}
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Wishlist button - always visible */}
+                      <ParticipantWishlistButton
+                        participantName={p.name}
+                        wishlist={p.wishlist}
+                        dictionary={dict.admin}
+                      />
+                      
+                      {/* Assignment and resend buttons - only after shuffle */}
+                      {room.shuffledAt && (
+                        <>
+                          <ParticipantAssignmentButton
+                            santaName={p.name}
+                            targetName={assignmentsMap.get(p.id)?.name ?? null}
+                            targetWishlist={assignmentsMap.get(p.id)?.wishlist ?? null}
+                            dictionary={dict.admin}
+                          />
+                          <ResendButton
+                            roomId={room.id}
+                            participantId={p.id}
+                            participantName={p.name}
+                            notificationsSent={p.notificationsSent}
+                            hasEmail={!!p.email}
+                            dictionary={dict.resendButton}
+                            locale={locale}
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
                 </li>
               ))}
